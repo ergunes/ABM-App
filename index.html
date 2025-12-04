@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Anat Baniel Metodu: 9 Temel Prensip</title>
+    
+    <!-- iOS Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="ABM Metodu" />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        -webkit-tap-highlight-color: transparent;
+      }
+      /* Custom Scrollbar for Modal */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: rgba(156, 163, 175, 0.5);
+        border-radius: 20px;
+      }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
+  }
+}
+</script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- Application Logic -->
+    <script type="module">
+        import React, { useState, useEffect, useRef } from 'https://esm.sh/react@18.2.0';
+        import ReactDOM from 'https://esm.sh/react-dom@18.2.0/client';
+        import { 
+            Snail, Feather, Eye, Compass, PauseCircle, Shuffle, 
+            Waves, Cloud, BookOpen, X, Sparkles, Clock, 
+            Volume2, StopCircle, Loader2, BrainCircuit, Globe 
+        } from 'https://esm.sh/lucide-react@0.292.0';
+        
+        // Google GenAI SDK
+        import { GoogleGenAI } from 'https://esm.sh/@google/genai@0.1.1';
+
+        // --- CONFIGURATION ---
+        // LÜTFEN BURAYA GEMINI API ANAHTARINIZI YAZIN
+        const API_KEY = "YOUR_API_KEY_HERE"; 
+
+        // --- CONSTANTS ---
+        const THEMES = [
+            { bg: "bg-green-50", border: "border-green-200", text: "text-green-800", iconBg: "bg-green-200", hover: "hover:bg-green-100" },
+            { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-800", iconBg: "bg-amber-200", hover: "hover:bg-amber-100" },
+            { bg: "bg-orange-50", border: "border-orange-200", text: "text-orange-800", iconBg: "bg-orange-200", hover: "hover:bg-orange-100" },
+            { bg: "bg-purple-50", border: "border-purple-200", text: "text-purple-800", iconBg: "bg-purple-200", hover: "hover:bg-purple-100" },
+            { bg: "bg-pink-50", border: "border-pink-200", text: "text-pink-800", iconBg: "bg-pink-200", hover: "hover:bg-pink-100" },
+            { bg: "bg-cyan-50", border: "border-cyan-200", text: "text-cyan-800", iconBg: "bg-cyan-200", hover: "hover:bg-cyan-100" },
+            { bg: "bg-teal-50", border: "border-teal-200", text: "text-teal-800", iconBg: "bg-teal-200", hover: "hover:bg-teal-100" },
+            { bg: "bg-rose-50", border: "border-rose-200", text: "text-rose-800", iconBg: "bg-rose-200", hover: "hover:bg-rose-100" },
+            { bg: "bg-blue-50", border: "border-blue-200", text: "text-blue-800", iconBg: "bg-blue-200", hover: "hover:bg-blue-100" },
+        ];
+
+        const ICONS = [Snail, Feather, Eye, Compass, PauseCircle, Shuffle, Waves, Cloud, BookOpen];
+
+        const UI_TEXT = {
+            tr: {
+                headerTitle: "Anat Baniel Metodu",
+                headerSubtitle: "9 Temel Prensip (Essentials)",
+                headerDesc: "Beyni uyandırmanın ve potansiyelinize erişmenin anahtarları. Detaylı bir farkındalık deneyimi almak için herhangi bir karta tıklayın.",
+                footerInfo: "Daha Fazla Bilgi: anatbanielmethod.com | Bu uygulama eğitim amaçlıdır.",
+                footerPower: "Powered by Google Gemini 2.5 Flash",
+                modalLoading: "AI size özel bir deneyim (experience) hazırlıyor...",
+                modalDone: "Tamamladım",
+                modalError: "Bir hata oluştu. Lütfen tekrar deneyin.",
+                modalQuote: "\"Beynin en iyi öğrendiği an, her şeyin yavaşladığı ve farkındalığın arttığı andır.\"",
+                clickForAI: "AI Deneyimi İçin Tıkla",
+                categoryLabel: "Anat Baniel Metodu",
+                fallbackTitle: "Basit Farkındalık",
+                fallbackContent: "Şu anda nefesinize odaklanın. Nefes alırken omuzlarınızın nasıl hareket ettiğini fark edin. Sadece gözlemleyin, değiştirmeye çalışmayın.",
+                fallbackDuration: "1 dakika",
+                listenButton: "Deneyimi Dinle",
+                stopButton: "Durdur",
+                audioLoading: "Ses hazırlanıyor..."
+            },
+            en: {
+                headerTitle: "Anat Baniel Method",
+                headerSubtitle: "The 9 Essentials",
+                headerDesc: "Keys to waking up the brain and accessing your potential. Click on any card to get a detailed mindfulness experience.",
+                footerInfo: "More Info: anatbanielmethod.com | This app is for educational purposes.",
+                footerPower: "Powered by Google Gemini 2.5 Flash",
+                modalLoading: "AI is preparing a custom experience for you...",
+                modalDone: "Done",
+                modalError: "An error occurred. Please try again.",
+                modalQuote: "\"The brain learns best when everything slows down and awareness increases.\"",
+                clickForAI: "Click for AI Experience",
+                categoryLabel: "Anat Baniel Method",
+                fallbackTitle: "Simple Awareness",
+                fallbackContent: "Focus on your breath right now. Notice how your shoulders move as you inhale. Just observe, do not try to change it.",
+                fallbackDuration: "1 minute",
+                listenButton: "Listen to Experience",
+                stopButton: "Stop",
+                audioLoading: "Preparing audio..."
+            },
+            de: {
+                headerTitle: "Anat Baniel Methode",
+                headerSubtitle: "Die 9 Essentials",
+                headerDesc: "Schlüssel zum Aufwecken des Gehirns und zum Erschließen Ihres Potenzials. Klicken Sie auf eine Karte für ein KI-Erlebnis.",
+                footerInfo: "Mehr Info: anatbanielmethod.com | Diese App dient Bildungszwecken.",
+                footerPower: "Powered by Google Gemini 2.5 Flash",
+                modalLoading: "KI bereitet ein spezielles Erlebnis für dich vor...",
+                modalDone: "Fertig",
+                modalError: "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+                modalQuote: "\"Das Gehirn erzeugt neue Informationen durch die Wahrnehmung von Unterschieden.\"",
+                clickForAI: "Klicken für KI-Erlebnis",
+                categoryLabel: "Anat Baniel Methode",
+                fallbackTitle: "Einfache Achtsamkeit",
+                fallbackContent: "Konzentrieren Sie sich jetzt auf Ihren Atem. Bemerken Sie, wie sich Ihre Schultern beim Einatmen bewegen. Beobachten Sie nur, versuchen Sie nicht, es zu ändern.",
+                fallbackDuration: "1 Minute",
+                listenButton: "Erlebnis anhören",
+                stopButton: "Stoppen",
+                audioLoading: "Audio wird vorbereitet..."
+            }
+        };
+
+        const PRINCIPLES_DATA = {
+            tr: [
+                { title: "Hareket ve Dikkat", description: "Sıkça hareket et ve hareket ederken ne hissettiğine dikkatini ver. Beynin milyarlarca yeni bağlantı kurmaya başlayacak, yeni olasılıklar ve dönüşüm yaratacaktır." },
+                { title: "Yavaşlık", description: "Yeni beceriler öğrenmek ve kısıtlamaları aşmak için iyice yavaşla. Hızlıyken sadece bildiğini yapabilirsin. Yavaşlık, zengin yeni nöral kalıpların oluşumunu uyarır." },
+                { title: "Varyasyon", description: "Yaptığın her şeye varyasyon (oyun, hatalar, keşif) kat. Beynin hareketlerinde, duygularında, düşüncelerinde ve eylemlerinde yeni olasılıklar yaratacaktır." },
+                { title: "İncelik (Subtlety)", description: "Hareket ederken, düşünürken ve eyleme geçerken kullandığın gücü azalt. Beyninin en ince farklılıkları algılama yeteneğini artıracak hassasiyeti geliştir." },
+                { title: "Coşku", description: "Coşku geliştirilebilir bir beceridir. Küçük şeyleri takdir etme ve onlardan keyif alma seçimidir. Önemli olanı güçlendirir ve beynine yeni öğrenilenleri kazır." },
+                { title: "Esnek Hedefler", description: "Hedefine nasıl ulaşacağını bilseydin, zaten orada olurdun. Yol boyunca beklenmedik adımları ve hataları kucakla. Bu zengin bilgiyle, hedefine ulaşma yolunu keşfet." },
+                { title: "Öğrenme Şalteri", description: "Beyin ya öğrenme modundadır ya da değildir. Şalteri AÇMAK için her durumda, tanıdık olanlarda bile, YENİ bir şey yapmayı, düşünmeyi veya öğrenmeyi bekle." },
+                { title: "Hayal Gücü ve Rüyalar", description: "Hayal et ve düşle! Hayal gücüyle, daha önce hiç var olmamış şeyleri yaratabilirsin. Rüyalar seni çağırır ve geleceğinden rehberlik eder." },
+                { title: "Farkındalık", description: "Her an ne yaptığının, duyumsadığının, düşündüğünün ve deneyimlediğinin farkında ol. Farkındalık bir eylemdir. Farkında olduğunda, tamamen canlı ve andasındır." },
+            ],
+            en: [
+                { title: "Movement with Attention", description: "Move often and bring attention to what you feel as you move. Your brain will start building billions of new connections, creating new possibilities and transformation." },
+                { title: "Slow", description: "Slow way down to learn new skills and overcome limitations. Fast you can only do what you already know. Slow stimulates the formation of rich new neural patterns." },
+                { title: "Variation", description: "Introduce variation (call it play, mistakes, exploration) into everything you do. Your brain will create new possibilities in your movements, feelings, thoughts, and action." },
+                { title: "Subtlety", description: "Reduce the force with which you move, think, and act. Develop greater sensitivity that will enhance your brain’s ability to perceive the finest of differences, and therefore learn." },
+                { title: "Enthusiasm", description: "Enthusiasm is a skill you can develop. It is a choice to appreciate and take delight in the small things. It amplifies what is important and grooves in new learning in your brain." },
+                { title: "Flexible Goals", description: "If you knew how to reach your goal, you’d already be there. Embrace unexpected steps and mistakes along the way. With this rich information, discover the path to achieving your goal." },
+                { title: "The Learning Switch", description: "The brain is either in a learning mode—or not. Expect that you will do, think, or learn something NEW in each situation, even familiar ones, to turn your learning switch ON." },
+                { title: "Imagination & Dreams", description: "Imagine and dream! With imagination, you can create what has never been there before. Dreams call you and guide you from your future." },
+                { title: "Awareness", description: "Become aware of what you are doing, sensing, thinking, and experiencing at any moment. Awareness is an action. When you are aware, you are fully alive and present." },
+            ],
+            de: [
+                { title: "Bewegung mit Aufmerksamkeit", description: "Bewege dich oft und richte deine Aufmerksamkeit darauf, was du fühlst. Dein Gehirn wird beginnen, Milliarden neuer Verbindungen aufzubauen, was neue Möglichkeiten schafft." },
+                { title: "Langsam", description: "Werde sehr langsam, um neue Fähigkeiten zu erlernen. Schnell kannst du nur das tun, was du bereits kennst. Langsamkeit stimuliert neue neuronale Muster." },
+                { title: "Variation", description: "Bringe Variation (Spiel, Fehler, Erkundung) in alles ein. Dein Gehirn wird neue Möglichkeiten in deinen Bewegungen, Gefühlen und Gedanken schaffen." },
+                { title: "Subtilität", description: "Reduziere die Kraft, mit der du dich bewegst und denkst. Entwickle eine größere Sensibilität, um feinste Unterschiede wahrzunehmen und zu lernen." },
+                { title: "Begeisterung", description: "Begeisterung ist eine Fähigkeit. Es ist eine Entscheidung, die kleinen Dinge zu schätzen. Sie verstärkt, was wichtig ist, und vertieft neues Lernen." },
+                { title: "Flexible Ziele", description: "Umarme unerwartete Schritte und Fehler auf dem Weg. Entdecke mit dieser reichen Information den Weg zum Erreichen deines Ziels." },
+                { title: "Der Lernschalter", description: "Das Gehirn ist entweder im Lernmodus – oder nicht. Erwarte, in jeder Situation etwas NEUES zu tun oder zu lernen, um den Lernschalter einzuschalten." },
+                { title: "Vorstellungskraft & Träume", description: "Stelle dir vor und träume! Mit Vorstellungskraft kannst du erschaffen, was noch nie da war. Beide werden dich zu neuen Höhen heben." },
+                { title: "Bewusstheit", description: "Werde dir dessen bewusst, was du in jedem Moment tust und erlebst. Bewusstheit ist eine Handlung. Wenn du bewusst bist, bist du voll lebendig und präsent." },
+            ]
+        };
+
+        const getPrinciples = (lang) => {
+            return PRINCIPLES_DATA[lang].map((data, index) => ({
+                id: index + 1,
+                ...data,
+                icon: ICONS[index],
+                colorTheme: THEMES[index]
+            }));
+        };
+
+        // --- GEMINI SERVICE ---
+        
+        // Setup AI Client
+        // Note: In a real app, do not expose API_KEY in client code.
+        const ai = new GoogleGenAI({ apiKey: API_KEY });
+
+        function decode(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes;
+        }
+
+        async function decodeAudioData(data, ctx, sampleRate = 24000, numChannels = 1) {
+            const bufferToUse = data.byteLength % 2 === 0 
+                ? data.buffer 
+                : data.buffer.slice(0, data.byteLength - (data.byteLength % 2));
+                
+            const dataInt16 = new Int16Array(bufferToUse);
+            const frameCount = dataInt16.length / numChannels;
+            const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
+
+            for (let channel = 0; channel < numChannels; channel++) {
+                const channelData = buffer.getChannelData(channel);
+                for (let i = 0; i < frameCount; i++) {
+                    channelData[i] = dataInt16[i * numChannels + channel] / 32768.0;
+                }
+            }
+            return buffer;
+        }
+
+        const PRINCIPLE_CONTEXTS = {
+            1: "Move often and bring attention to what you feel as you move. Your brain will start building billions of new connections, creating new possibilities and transformation.",
+            2: "Slow way down to learn new skills and overcome limitations. Fast you can only do what you already know. Slow stimulates the formation of rich new neural patterns.",
+            3: "Introduce variation (call it play, mistakes, exploration) into everything you do. Your brain will create new possibilities in your movements, feelings, thoughts, and action.",
+            4: "Reduce the force with which you move, think, and act. Develop greater sensitivity that will enhance your brain’s ability to perceive the finest of differences, and therefore learn.",
+            5: "Enthusiasm is a skill you can develop. It is a choice to appreciate and take delight in the small things. It amplifies what is important and grooves in new learning in your brain.",
+            6: "If you knew how to reach your goal, you’d already be there. Embrace unexpected steps and mistakes along the way. With this rich information, discover the path to achieving your goal.",
+            7: "The brain is either in a learning mode—or not. Expect that you will do, think, or learn something NEW in each situation, even familiar ones, to turn your learning switch ON.",
+            8: "Imagine and dream! With imagination, you can create what has never been there before. Dreams call you and guide you from your future. Both will elevate you to new heights, transcending your limitations.",
+            9: "Become aware of what you are doing, sensing, thinking, and experiencing at any moment. Awareness is an action. When you are aware, you are fully alive and present."
+        };
+
+        const generateExercise = async (principle, language) => {
+            if (!API_KEY || API_KEY === "YOUR_API_KEY_HERE") {
+                 // Return fallback if no key
+                 const fallback = UI_TEXT[language];
+                 return {
+                    title: fallback.fallbackTitle,
+                    content: "API Key eksik. Lütfen index.html dosyasını düzenleyip API_KEY değişkenine anahtarınızı girin. \n\n" + fallback.fallbackContent,
+                    duration: fallback.fallbackDuration
+                 };
+            }
+
+            const specificContext = PRINCIPLE_CONTEXTS[principle.id] || principle.description;
+            const abmMethodologyInstruction = `
+                Based on the Anat Baniel Method (NeuroMovement) 9 Essentials.
+                Do NOT create a fitness exercise, a stretch, or a generic meditation.
+                Create a 'Micro-Experience' (Erlebnis / Deneyim) that embodies the specific essential definition below.
+                
+                The Essential: "${principle.title}"
+                Definition from Source: "${specificContext}"
+                
+                Instruction: Create a brief (approx 1 min) guided experience where the user performs a very small, safe, internal or external action to FEEL this principle.
+                Focus on sensation, perception, and the nervous system, not muscle building.
+            `;
+
+            const prompts = {
+                tr: `${abmMethodologyInstruction}
+                     Kullanıcının şu an (otururken/ayaktayken) yapabileceği kısa bir "Deneyim" (Experience) tasarla.
+                     Mekanik bir egzersiz değil, bir keşif olsun.
+                     Ses tonu: Nazik, davetkar, yavaş.
+                     Çıktı dili: Türkçe.`,
+                en: `${abmMethodologyInstruction}
+                     Design a short "Experience" that the user can do right now (sitting/standing).
+                     Not a mechanical exercise, but an exploration/discovery.
+                     Tone: Gentle, inviting, slow.
+                     Output language: English.`,
+                de: `${abmMethodologyInstruction}
+                     Entwerfe ein kurzes "Erlebnis" (keine Übung!), das der Benutzer jetzt sofort (im Sitzen/Stehen) machen kann.
+                     Es soll keine mechanische Wiederholung sein, sondern eine Entdeckung.
+                     Tonfall: Sanft, einladend, langsam.
+                     Ausgabesprache: Deutsch.`
+            };
+
+            const currentPrompt = prompts[language];
+
+            try {
+                const response = await ai.models.generateContent({
+                    model: "gemini-2.5-flash",
+                    contents: currentPrompt,
+                    config: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                title: { type: "STRING" },
+                                content: { type: "STRING" },
+                                duration: { type: "STRING" },
+                            },
+                            required: ["title", "content", "duration"],
+                        },
+                    },
+                });
+
+                if (response.text) {
+                    let jsonStr = response.text.trim();
+                     if (jsonStr.startsWith('```json')) {
+                        jsonStr = jsonStr.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+                      } else if (jsonStr.startsWith('```')) {
+                        jsonStr = jsonStr.replace(/^```\s*/, '').replace(/\s*```$/, '');
+                      }
+                    return JSON.parse(jsonStr);
+                }
+                throw new Error("Empty response");
+            } catch (error) {
+                console.error("AI Error:", error);
+                const fallback = UI_TEXT[language];
+                return {
+                    title: fallback.fallbackTitle,
+                    content: fallback.fallbackContent,
+                    duration: fallback.fallbackDuration
+                };
+            }
+        };
+
+        const generateExerciseAudio = async (text, language) => {
+            if (!API_KEY || API_KEY === "YOUR_API_KEY_HERE") return null;
+
+            const toneInstruction = {
+                tr: "Lütfen bu metni çok yavaş, nazik, sakinleştirici ve meditatif bir ses tonuyla oku. Cümleler arasında belirgin esler ver: ",
+                en: "Please read this text in a very slow, gentle, soothing, and meditative tone. Pause clearly between sentences: ",
+                de: "Bitte lesen Sie diesen Text in einem sehr langsamen, sanften, beruhigenden und meditativen Ton. Mach deutliche Pausen: "
+            };
+
+            const promptText = `${toneInstruction[language]} "${text}"`;
+
+            try {
+                const response = await ai.models.generateContent({
+                    model: "gemini-2.5-flash-preview-tts",
+                    contents: [{ parts: [{ text: promptText }] }],
+                    config: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: { voiceName: 'Kore' },
+                            },
+                        },
+                    },
+                });
+
+                const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+                if (base64Audio) {
+                    return decode(base64Audio);
+                }
+                return null;
+            } catch (error) {
+                console.error("TTS Error:", error);
+                return null;
+            }
+        };
+
+        // --- COMPONENTS ---
+
+        const LanguageSelector = ({ current, onChange }) => {
+            return React.createElement('div', { className: 'flex items-center gap-2 bg-white/80 backdrop-blur-sm p-1.5 rounded-full border border-gray-200 shadow-sm' }, 
+                React.createElement(Globe, { size: 16, className: 'text-gray-400 ml-2' }),
+                React.createElement('div', { className: 'flex' },
+                    ['tr', 'en', 'de'].map(lang => 
+                        React.createElement('button', {
+                            key: lang,
+                            onClick: () => onChange(lang),
+                            className: `px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 ${current === lang ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'}`
+                        }, lang.toUpperCase())
+                    )
+                )
+            );
+        };
+
+        const PrincipleCard = ({ principle, onClick, hoverText }) => {
+            const { title, description, icon: Icon, colorTheme, id } = principle;
+            return React.createElement('div', {
+                onClick: () => onClick(principle),
+                className: `${colorTheme.bg} ${colorTheme.border} border rounded-2xl p-6 flex items-start gap-4 cursor-pointer transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg ${colorTheme.hover} group`
+            }, [
+                React.createElement('div', {
+                    key: 'icon',
+                    className: `flex-shrink-0 w-16 h-16 rounded-full flex items-center justify-center ${colorTheme.iconBg} text-gray-800 shadow-sm`
+                }, React.createElement(Icon, { size: 32, strokeWidth: 1.5 })),
+                React.createElement('div', { key: 'content', className: 'flex-1' }, [
+                    React.createElement('h3', { key: 'title', className: `font-bold text-lg mb-1 flex items-center gap-2 ${colorTheme.text}` }, [
+                        React.createElement('span', { key: 'id', className: 'text-sm opacity-60 font-mono' }, `${id}.`),
+                        title
+                    ]),
+                    React.createElement('p', { key: 'desc', className: 'text-gray-700 text-sm leading-relaxed' }, description),
+                    React.createElement('div', { key: 'cta', className: 'mt-3 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-1' }, [
+                        React.createElement('span', { key: 'text' }, hoverText),
+                        React.createElement('span', { key: 'arrow' }, '→')
+                    ])
+                ])
+            ]);
+        };
+
+        const ExerciseModal = ({ isOpen, onClose, loading, exercise, principle, language }) => {
+            const modalRef = useRef(null);
+            const text = UI_TEXT[language];
+            const [isPlaying, setIsPlaying] = useState(false);
+            const [isAudioLoading, setIsAudioLoading] = useState(false);
+            const audioContextRef = useRef(null);
+            const sourceNodeRef = useRef(null);
+            const bgMusicRef = useRef(null);
+            const BG_MUSIC_URL = "https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3"; 
+
+            const stopAudio = () => {
+                if (sourceNodeRef.current) {
+                    try { sourceNodeRef.current.stop(); } catch (e) {}
+                    sourceNodeRef.current = null;
+                }
+                if (bgMusicRef.current) {
+                    bgMusicRef.current.pause();
+                    bgMusicRef.current.currentTime = 0;
+                }
+                if (audioContextRef.current?.state === 'running') {
+                    audioContextRef.current.suspend();
+                }
+                setIsPlaying(false);
+                setIsAudioLoading(false);
+            };
+
+            useEffect(() => {
+                if (!isOpen) stopAudio();
+            }, [isOpen]);
+
+            useEffect(() => {
+                const handleClickOutside = (event) => {
+                    if (modalRef.current && !modalRef.current.contains(event.target)) {
+                        onClose();
+                        stopAudio();
+                    }
+                };
+                if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+                return () => document.removeEventListener('mousedown', handleClickOutside);
+            }, [isOpen, onClose]);
+
+            const handlePlayAudio = async () => {
+                if (!exercise) return;
+                if (isPlaying) {
+                    stopAudio();
+                    return;
+                }
+                setIsAudioLoading(true);
+                try {
+                    if (!audioContextRef.current) {
+                        audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    if (audioContextRef.current.state === 'suspended') {
+                        await audioContextRef.current.resume();
+                    }
+                    const audioData = await generateExerciseAudio(exercise.content, language);
+                    if (!audioData) throw new Error("Audio generation failed");
+                    
+                    const audioBuffer = await decodeAudioData(audioData, audioContextRef.current, 24000, 1);
+                    
+                    if (!bgMusicRef.current) {
+                        bgMusicRef.current = new Audio(BG_MUSIC_URL);
+                        bgMusicRef.current.loop = true;
+                        bgMusicRef.current.volume = 0.15;
+                    }
+                    bgMusicRef.current.play().catch(e => console.warn("Bg music error", e));
+
+                    const source = audioContextRef.current.createBufferSource();
+                    source.buffer = audioBuffer;
+                    source.connect(audioContextRef.current.destination);
+                    source.onended = () => {
+                        setIsPlaying(false);
+                        if (bgMusicRef.current) bgMusicRef.current.pause();
+                    };
+                    source.start(0);
+                    sourceNodeRef.current = source;
+                    setIsPlaying(true);
+                } catch (error) {
+                    console.error("Playback error", error);
+                    alert("Ses oynatılamadı. API Key kontrol edin veya tarayıcı izinlerini inceleyin.");
+                } finally {
+                    setIsAudioLoading(false);
+                }
+            };
+
+            if (!isOpen || !principle) return null;
+
+            return React.createElement('div', { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-opacity animate-in fade-in duration-200' }, 
+                React.createElement('div', { ref: modalRef, className: 'w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] transform transition-all duration-300 scale-100' }, [
+                    // Header
+                    React.createElement('div', { key: 'header', className: `p-6 ${principle.colorTheme.bg} border-b ${principle.colorTheme.border} flex justify-between items-start` }, [
+                        React.createElement('div', { key: 'title-group', className: 'flex gap-4 items-center' }, [
+                            React.createElement('div', { key: 'icon', className: 'p-3 rounded-full bg-white/50 text-gray-800' }, React.createElement(principle.icon, { size: 24 })),
+                            React.createElement('div', { key: 'titles' }, [
+                                React.createElement('p', { key: 'cat', className: 'text-xs uppercase tracking-wider opacity-60 font-semibold' }, text.categoryLabel),
+                                React.createElement('h2', { key: 'main-title', className: 'text-xl font-bold text-gray-900' }, principle.title)
+                            ])
+                        ]),
+                        React.createElement('button', { key: 'close', onClick: () => { onClose(); stopAudio(); }, className: 'p-2 rounded-full hover:bg-black/5 text-gray-500 hover:text-gray-800 transition-colors' }, React.createElement(X, { size: 20 }))
+                    ]),
+                    // Content
+                    React.createElement('div', { key: 'content-body', className: 'p-8 overflow-y-auto relative custom-scrollbar' }, 
+                        loading ? React.createElement('div', { className: 'flex flex-col items-center justify-center py-12 space-y-4' }, [
+                            React.createElement('div', { key: 'spinner', className: 'relative' }, [
+                                React.createElement('div', { className: `w-12 h-12 rounded-full border-4 border-t-transparent ${principle.colorTheme.text.replace('text', 'border')} animate-spin` }),
+                                React.createElement('div', { className: 'absolute inset-0 flex items-center justify-center' }, React.createElement(Sparkles, { size: 16, className: principle.colorTheme.text }))
+                            ]),
+                            React.createElement('p', { key: 'loading-text', className: 'text-gray-500 animate-pulse text-sm' }, text.modalLoading)
+                        ]) : exercise ? React.createElement('div', { className: 'space-y-6' }, [
+                            React.createElement('div', { key: 'ex-header', className: 'flex items-center justify-between' }, [
+                                React.createElement('h3', { className: 'text-2xl font-semibold text-gray-800 leading-tight' }, exercise.title),
+                                React.createElement('div', { className: 'flex items-center gap-1 text-xs font-medium px-3 py-1 bg-gray-100 rounded-full text-gray-600 shrink-0' }, [
+                                    React.createElement(Clock, { size: 12 }), exercise.duration
+                                ])
+                            ]),
+                            // Audio Button
+                            React.createElement('div', { key: 'audio-btn', className: 'flex justify-center my-4' }, 
+                                React.createElement('button', {
+                                    onClick: handlePlayAudio,
+                                    disabled: isAudioLoading,
+                                    className: `flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all shadow-md ${isPlaying ? 'bg-rose-100 text-rose-700 hover:bg-rose-200 border border-rose-200' : `${principle.colorTheme.bg.replace('50', '100')} ${principle.colorTheme.text} hover:shadow-lg`}`
+                                }, [
+                                    isAudioLoading ? React.createElement(Loader2, { size: 20, className: 'animate-spin' }) : isPlaying ? React.createElement(StopCircle, { size: 20 }) : React.createElement(Volume2, { size: 20 }),
+                                    React.createElement('span', null, isAudioLoading ? text.audioLoading : isPlaying ? text.stopButton : text.listenButton)
+                                ])
+                            ),
+                            React.createElement('div', { key: 'ex-text', className: 'prose prose-stone' }, 
+                                React.createElement('p', { className: 'text-gray-700 whitespace-pre-line leading-relaxed text-lg' }, exercise.content)
+                            ),
+                            React.createElement('div', { key: 'quote', className: `mt-6 p-4 rounded-xl ${principle.colorTheme.bg} bg-opacity-50 border border-dashed ${principle.colorTheme.border}` }, 
+                                React.createElement('p', { className: 'text-sm text-gray-600 italic text-center' }, text.modalQuote)
+                            )
+                        ]) : React.createElement('div', { className: 'text-center py-8 text-gray-500' }, text.modalError)
+                    ),
+                    // Footer
+                    React.createElement('div', { key: 'footer', className: 'p-4 bg-gray-50 border-t flex justify-end' }, 
+                        React.createElement('button', { 
+                            onClick: () => { onClose(); stopAudio(); },
+                            className: 'px-6 py-2 rounded-xl bg-gray-900 text-white font-medium hover:bg-gray-800 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                        }, text.modalDone)
+                    )
+                ])
+            );
+        };
+
+        const App = () => {
+            const [language, setLanguage] = useState('tr');
+            const [selectedPrinciple, setSelectedPrinciple] = useState(null);
+            const [modalOpen, setModalOpen] = useState(false);
+            const [loading, setLoading] = useState(false);
+            const [exercise, setExercise] = useState(null);
+
+            const text = UI_TEXT[language];
+            const principles = getPrinciples(language);
+
+            const handleCardClick = async (principle) => {
+                setSelectedPrinciple(principle);
+                setModalOpen(true);
+                setLoading(true);
+                setExercise(null);
+                try {
+                    const result = await generateExercise(principle, language);
+                    setExercise(result);
+                } catch (error) {
+                    console.error("Fetch failed", error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const handleCloseModal = () => {
+                setModalOpen(false);
+                setTimeout(() => {
+                    setSelectedPrinciple(null);
+                    setExercise(null);
+                }, 300);
+            };
+
+            return React.createElement('div', { className: 'min-h-screen bg-gray-50 text-gray-900 pb-12 selection:bg-blue-100' }, [
+                // Header
+                React.createElement('header', { key: 'header', className: 'bg-white border-b border-gray-200 pt-10 pb-16 px-4 mb-8 relative overflow-hidden' }, [
+                    React.createElement('div', { key: 'bg-icon', className: 'absolute top-0 right-0 p-8 opacity-5 transform rotate-12' }, React.createElement(BrainCircuit, { size: 200 })),
+                    React.createElement('div', { key: 'lang', className: 'absolute top-4 right-4 z-20' }, React.createElement(LanguageSelector, { current: language, onChange: setLanguage })),
+                    React.createElement('div', { key: 'hero-content', className: 'max-w-6xl mx-auto text-center relative z-10 mt-6' }, [
+                        React.createElement('h1', { key: 'h1', className: 'text-4xl md:text-5xl font-extrabold text-slate-800 tracking-tight mb-3' }, text.headerTitle),
+                        React.createElement('h2', { key: 'h2', className: 'text-2xl md:text-3xl font-light text-slate-600 mb-6' }, text.headerSubtitle),
+                        React.createElement('p', { key: 'desc', className: 'max-w-2xl mx-auto text-gray-500 text-sm md:text-base leading-relaxed' }, text.headerDesc)
+                    ])
+                ]),
+                // Grid
+                React.createElement('main', { key: 'main', className: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8' }, 
+                    React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' }, 
+                        principles.map(principle => React.createElement(PrincipleCard, { 
+                            key: principle.id, 
+                            principle, 
+                            onClick: handleCardClick, 
+                            hoverText: text.clickForAI 
+                        }))
+                    )
+                ),
+                // Footer
+                React.createElement('footer', { key: 'footer', className: 'mt-16 text-center text-gray-400 text-xs pb-8' }, [
+                    React.createElement('p', { key: 'f1' }, text.footerInfo),
+                    React.createElement('p', { key: 'f2', className: 'mt-2' }, text.footerPower)
+                ]),
+                // Modal
+                React.createElement(ExerciseModal, { 
+                    key: 'modal',
+                    isOpen: modalOpen, 
+                    onClose: handleCloseModal, 
+                    loading, 
+                    exercise, 
+                    principle: selectedPrinciple, 
+                    language 
+                })
+            ]);
+        };
+
+        // Render
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(App));
+    </script>
+</body>
+</html>

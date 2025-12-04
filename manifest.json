@@ -1,0 +1,21 @@
+{
+  "short_name": "ABM Metodu",
+  "name": "Anat Baniel Metodu: 9 Prensip",
+  "icons": [
+    {
+      "src": "https://placehold.co/192x192/4f46e5/ffffff/png?text=ABM",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://placehold.co/512x512/4f46e5/ffffff/png?text=ABM",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#ffffff",
+  "background_color": "#f8fafc",
+  "orientation": "portrait"
+}
